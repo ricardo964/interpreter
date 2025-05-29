@@ -16,7 +16,6 @@ int main(int argc, char **argv)
         std::cout << "-> ";
         std::getline(std::cin, buffer);
         lex.tokenizer(buffer);
-        lex.print_tokens();
     }
 
     return 0;
