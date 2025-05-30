@@ -17,13 +17,14 @@ private:
 public:
     Lexer();
 
+    void next();
     std::vector<Token> get_tokens();
-    char next_character();
+    char get_character();
     void forward_to_end();
     bool is_character(char character);
     bool is_digit(char character);
-    std::string dfa_number(char character);
-    std::string dfa_identifier(char character);
+    std::string dfa_number();
+    std::string dfa_identifier();
     std::vector<Token> tokenizer(std::string new_source); 
 };
 

@@ -12,12 +12,19 @@ Lexer::Lexer()
     end = 0;
 }
 
-std::vector<Token> Lexer::get_tokens() { return tokens; }
+std::vector<Token> Lexer::get_tokens()
+{
+    return tokens;
+}
 
-char Lexer::next_character()
+void Lexer::next()
 {
     end += 1;
-    return source[end - 1];
+}
+
+char Lexer::get_character()
+{
+    return source[end];
 }
 
 void Lexer::forward_to_end()
@@ -39,31 +46,33 @@ bool Lexer::is_digit(char character)
     return false;
 }
 
-std::string Lexer::dfa_number(char character)
+std::string Lexer::dfa_number()
 {
-    char current_character = character;
     std::string lexeme;
-    while (true)
+
+    for (
+        char character = get_character();
+        is_digit(character) or character == '.';
+        character = get_character())
     {
-        if (!(is_digit(current_character) || current_character == '.'))
-            break;
-        lexeme += current_character;
-        current_character = next_character();
+        lexeme += character;
+        next();
     }
 
     return lexeme;
 }
 
-std::string Lexer::dfa_identifier(char character)
+std::string Lexer::dfa_identifier()
 {
-    char current_character = character;
     std::string lexeme;
-    while (true)
+
+    for (
+        char character = get_character();
+        is_character(character) or character == '_';
+        character = get_character())
     {
-        if (!is_character(current_character))
-            break;
-        lexeme += current_character;
-        current_character = next_character();
+        lexeme += character;
+        next();
     }
 
     return lexeme;
@@ -74,61 +83,67 @@ std::vector<Token> Lexer::tokenizer(std::string new_source)
     source += new_source;
     while (end < source.size())
     {
-        char character = next_character();
+        char character = get_character();
 
         if (is_character(character))
         {
-            std::string lexeme_id = dfa_identifier(character);
+            std::string lexeme = dfa_identifier();
             tokens.push_back(
-                Token(token_type::IDENTIFIER, lexeme_id));
-            end--;
+                Token(token_type::IDENTIFIER, lexeme));
+            forward_to_end();
             continue;
         }
 
         if (is_digit(character))
         {
-            std::string lexeme_id = dfa_number(character);
+            std::string lexeme = dfa_number();
             tokens.push_back(
-                Token(token_type::NUMBER, lexeme_id));
-            end--;
+                Token(token_type::NUMBER, lexeme));
+            forward_to_end();
             continue;
         }
 
         switch (character)
         {
+        case ' ':
+            break;
+
+        case '\n':
+            break;
+
+        case '\t':
+            break;
+
         case '=':
             tokens.push_back(
                 Token(token_type::EGUAL, std::string(1, character)));
-            forward_to_end();
             break;
 
         case '+':
             tokens.push_back(
                 Token(token_type::PLUS, std::string(1, character)));
-            forward_to_end();
             break;
 
         case '-':
             tokens.push_back(
                 Token(token_type::MINUS, std::string(1, character)));
-            forward_to_end();
             break;
 
         case '*':
             tokens.push_back(
                 Token(token_type::STAR, std::string(1, character)));
-            forward_to_end();
             break;
 
         case '/':
             tokens.push_back(
                 Token(token_type::LBAR, std::string(1, character)));
-            forward_to_end();
             break;
         default:
+            std::cout << "invalid character " << character << std::endl;
             break;
         }
 
+        next();
         forward_to_end();
     }
 
